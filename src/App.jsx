@@ -48,7 +48,7 @@ const App = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetch("http://localhost:4000/api/todo/")
+      fetch("https://backend-todo-beryl.vercel.app/api/todo")
         .then((response) => response.json())
         .then((data) => {
           const dataWithIndex = data.map((x, index) => ({
@@ -134,7 +134,7 @@ const App = () => {
     setToggleStates((prev) => ({ ...prev, [index]: checked }));
     const todoId = render[index]._id;
 
-    fetch(`http://localhost:4000/api/todo/${todoId}`, {
+    fetch(`https://backend-todo-beryl.vercel.app/api/todo/${todoId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -171,7 +171,7 @@ const App = () => {
     e.preventDefault();
     if (data.title && data.description && data.days && data.schedule) {
       if (validateDate(data.days)) {
-        fetch("http://localhost:4000/api/todo/", {
+        fetch("https://backend-todo-beryl.vercel.app/api/todo/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -233,9 +233,12 @@ const App = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:4000/api/todo/${render[index]._id}`, {
-          method: "DELETE",
-        })
+        fetch(
+          `https://backend-todo-beryl.vercel.app/api/todo/${render[index]._id}`,
+          {
+            method: "DELETE",
+          }
+        )
           .then(() => {
             Swal.fire({
               icon: "success",
@@ -281,13 +284,16 @@ const App = () => {
       editTask.schedule
     ) {
       if (validateDate(editTask.days)) {
-        fetch(`http://localhost:4000/api/todo/${editTask._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(editTask),
-        })
+        fetch(
+          `https://backend-todo-beryl.vercel.app/api/todo/${editTask._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(editTask),
+          }
+        )
           .then(() => {
             Swal.fire({
               icon: "success",
@@ -295,7 +301,7 @@ const App = () => {
               showConfirmButton: false,
               timer: 1200,
             });
-          })  
+          })
           .then(() => {
             setIsUpdated(isUpdated + 1);
             setOpenEditPanel(false);
