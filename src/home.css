@@ -1,0 +1,31 @@
+/* styles.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, rgb(86, 80, 86), rgb(72, 72, 55));
+  font-family: "Arial", sans-serif;
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #fff; /* Text color for better contrast */
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff; /* Button color */
+  color: #fff; /* Text color */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Transition effect */
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker color on hover */
+  transform: scale(1.05); /* Slight zoom effect on hover */
+}
