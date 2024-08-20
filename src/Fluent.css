@@ -2,3 +2,14 @@
   width: 62%;
   margin: AUTO;
 }
+.logout-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.link-145 {
+  color: aliceblue;
+}
+.linkIsSelected-139 {
+  color: aliceblue;
+}
