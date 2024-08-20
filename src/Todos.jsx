@@ -17,6 +17,8 @@ import "./Fluent.css";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
+import { mergeStyles } from "@fluentui/react/lib/Styling";
+
 const getTodayDate = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -86,7 +88,7 @@ const App = () => {
     };
 
     fetchData();
-  }, [isUpdated]);
+  }, [isUpdated, token]);
 
   const columns = [
     {
@@ -367,6 +369,18 @@ const App = () => {
     localStorage.removeItem("token");
     window.location.reload();
   };
+
+  const pivotHeaderClass = mergeStyles({
+    selectors: {
+      ".ms-Pivot-link": {
+        color: "#fff", // Change header text color to white
+      },
+      ".ms-Pivot-link.is-active": {
+        color: "#fff", // Change active header text color to white
+      },
+    },
+  });
+
   return (
     <div
       style={{
@@ -418,14 +432,19 @@ const App = () => {
         />
         <PrimaryButton type="submit">Submit</PrimaryButton>
       </form>
-      <div className="hello">
-        <Pivot aria-label="Basic Pivot Example">
+
+      <div
+        style={{ width: "63%", marginLeft: "20%", color: "#fff !important" }}
+        className="hello"
+      >
+        {/* <Pivot aria-label="Basic Pivot Example">
           <PivotItem
             headerText="Active Tasks"
             headerButtonProps={{
               "data-order": 1,
               "data-title": "Active Tasks",
             }}
+
           >
             <Label styles={{ root: { color: "#fff" } }}>
               <div style={{ display: "grid", placeContent: "center" }}>
@@ -453,6 +472,61 @@ const App = () => {
                 {completedTasks.length === 0 ? (
                   <div>
                     <h1>No completed tasks available</h1>
+                  </div>
+                ) : (
+                  <DetailsList
+                    items={completedTasks}
+                    columns={columns}
+                    setKey="set"
+                    layoutMode={DetailsListLayoutMode.fixedColumns}
+                    isMultiline={true}
+                    selectionMode={0}
+                    enableShimmer={loading}
+                  />
+                )}
+              </div>
+            </Label>
+          </PivotItem>
+        </Pivot> */}
+
+        <Pivot aria-label="Basic Pivot Example" className={pivotHeaderClass}>
+          <PivotItem
+            headerText="Active Tasks"
+            headerButtonProps={{
+              "data-order": 1,
+              "data-title": "Active Tasks",
+            }}
+          >
+            <Label styles={{ root: { color: "#fff" } }}>
+              <div style={{ display: "grid", placeContent: "center" }}>
+                {/* Assume activeTasks and columns are defined */}
+                {activeTasks.length === 0 ? (
+                  <div>
+                    <h1 style={{ color: "#fff" }}>No active tasks available</h1>
+                  </div>
+                ) : (
+                  <DetailsList
+                    items={activeTasks}
+                    columns={columns}
+                    setKey="set"
+                    layoutMode={DetailsListLayoutMode.fixedColumns}
+                    isMultiline={true}
+                    selectionMode={0}
+                    enableShimmer={loading}
+                  />
+                )}
+              </div>
+            </Label>
+          </PivotItem>
+          <PivotItem headerText="Completed">
+            <Label styles={{ root: { color: "#fff" } }}>
+              <div style={{ display: "grid", placeContent: "center" }}>
+                {/* Assume completedTasks and columns are defined */}
+                {completedTasks.length === 0 ? (
+                  <div>
+                    <h1 style={{ color: "#fff" }}>
+                      No completed tasks available
+                    </h1>
                   </div>
                 ) : (
                   <DetailsList
