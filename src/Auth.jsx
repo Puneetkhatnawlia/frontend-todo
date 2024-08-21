@@ -1,20 +1,20 @@
-import { useState } from "react";
-import Swal from "sweetalert2";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { useRef } from "react";
 import axios from "axios";
 import "./login.css";
+
 const Auth = () => {
   const [isSignInForm, setSignInForm] = useState(true);
+  const [error, setError] = useState(""); // State for error messages
   const navigate = useNavigate();
 
   const emailRef = useRef();
   const passwordRef = useRef();
   const nameRef = useRef();
 
-  const toogleSignInForm = () => {
+  const toggleSignInForm = () => {
     setSignInForm(!isSignInForm);
+    setError(""); 
   };
 
   const handleSubmit = async (e) => {
@@ -22,14 +22,13 @@ const Auth = () => {
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     const name = nameRef.current ? nameRef.current.value : "";
+
     try {
       if (isSignInForm) {
+        // Sign In
         const response = await axios.post(
           "https://backend-todo-beryl.vercel.app/api/auth/login",
-          {
-            email,
-            password,
-          }
+          { email, password }
         );
         localStorage.setItem("token", response.data.token);
         navigate("/todos");
@@ -37,55 +36,29 @@ const Auth = () => {
         // Sign Up
         await axios.post(
           "https://backend-todo-beryl.vercel.app/api/auth/register",
-          {
-            email,
-            username: name,
-            password,
-          }
+          { email, username: name, password }
         );
-        Swal.fire({
-          title: "Success",
-          text: "You have been registered successfully",
-          icon: "success",
-        }).then(() => {
-          setSignInForm(!isSignInForm);
-        });
-        setSignInForm(!isSignInForm);
+        setSignInForm(true);
+        setError("You have been registered successfully");
       }
     } catch (error) {
+      let errorMessage =
+        "An unexpected error occurred. Please try again later.";
+
       if (error.response) {
-        if (error.response.status === 401) {
-          Swal.fire({
-            title: "Error",
-            text: "Invalid email or password",
-            icon: "error",
-          });
+        if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
         } else if (error.response.status === 400) {
-          Swal.fire({
-            title: "Error",
-            text: "error",
-            icon: "error",
-          });
-        } else {
-          Swal.fire({
-            title: "Error",
-            text: "An unexpected error occurred. Please try again later.",
-            icon: "error",
-          });
+          errorMessage = "Bad request. Please check your input.";
+        } else if (error.response.status === 500) {
+          errorMessage = "Server error. Please try again later.";
         }
       } else if (error.request) {
-        Swal.fire({
-          title: "Error",
-          text: "No response received from the server. Please check your connection.",
-          icon: "error",
-        });
-      } else {
-        Swal.fire({
-          title: "Error",
-          text: "An error occurred while setting up the request.",
-          icon: "error",
-        });
+        errorMessage =
+          "No response received from the server. Please check your connection.";
       }
+
+      setError(errorMessage);
     }
   };
 
@@ -108,6 +81,7 @@ const Auth = () => {
                     ref={nameRef}
                     placeholder="Full Name"
                     className="input-field"
+                    required
                   />
                 </div>
               )}
@@ -139,12 +113,14 @@ const Auth = () => {
                   ref={passwordRef}
                   placeholder="Password"
                   className="input-field"
+                  required
                 />
+                {error && <p className="error-text">{error}</p>}
               </div>
               <button type="submit" className="submit-button">
                 {isSignInForm ? "Sign In" : "Sign Up"}
               </button>
-              <p className="toggle-link" onClick={toogleSignInForm}>
+              <p className="toggle-link" onClick={toggleSignInForm}>
                 {isSignInForm
                   ? "New to todolist? Sign Up Now"
                   : "Already registered? Sign In Now"}
