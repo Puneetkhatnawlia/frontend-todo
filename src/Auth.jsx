@@ -1,20 +1,27 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./login.css";
 
 const Auth = () => {
   const [isSignInForm, setSignInForm] = useState(true);
-  const [error, setError] = useState(""); // State for error messages
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const emailRef = useRef();
   const passwordRef = useRef();
   const nameRef = useRef();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/todos");
+    }
+  }, [navigate]);
+
   const toggleSignInForm = () => {
     setSignInForm(!isSignInForm);
-    setError(""); 
+    setError("");
   };
 
   const handleSubmit = async (e) => {
