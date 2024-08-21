@@ -3,14 +3,12 @@ import {
   PrimaryButton,
   TextField,
   DetailsList,
-  DetailsListLayoutMode,
   IconButton,
   Panel,
   Label,
   Toggle,
   Pivot,
   PivotItem,
-  SelectionMode,
 } from "@fluentui/react";
 import Swal from "sweetalert2";
 import "./App.css";
@@ -458,9 +456,7 @@ const App = () => {
                   <DetailsList
                     items={activeTasks}
                     columns={columns}
-                    setKey="set"
-                    layoutMode={DetailsListLayoutMode.fixedColumns}
-                    selectionMode={SelectionMode.none}
+              
                   />
                 )}
               </div>
@@ -479,9 +475,7 @@ const App = () => {
                   <DetailsList
                     items={completedTasks}
                     columns={columns}
-                    setKey="set"
-                    layoutMode={DetailsListLayoutMode.fixedColumns}
-                    selectionMode={SelectionMode.none}
+                   
                   />
                 )}
               </div>
