@@ -10,6 +10,7 @@ import {
   Toggle,
   Pivot,
   PivotItem,
+  SelectionMode,
 } from "@fluentui/react";
 import Swal from "sweetalert2";
 import "./App.css";
@@ -45,12 +46,11 @@ const App = () => {
     schedule: "",
   });
 
-  const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
-  const [toggleStates, setToggleStates] = useState({});
   const [isUpdated, setIsUpdated] = useState(0);
   const [openEditPanel, setOpenEditPanel] = useState(false);
   const [editTask, setEditTask] = useState({
+    _id: "",
     title: "",
     description: "",
     days: getTodayDate(),
@@ -60,7 +60,6 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const response = await fetch(
           "https://backend-todo-beryl.vercel.app/api/todo",
@@ -82,9 +81,7 @@ const App = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         setTasks([]);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchData();
@@ -116,42 +113,46 @@ const App = () => {
       key: "col5",
       name: "Completed",
       fieldName: "completed",
-      onRender: (item, index) => (
+      onRender: (item) => (
         <Toggle
-          checked={toggleStates[index] || item.completed}
-          onChange={(e, val) => handleToggle(index, val)}
+          checked={item.completed}
+          onChange={(e, val) => handleToggle(item._id, val)}
         />
       ),
     },
     {
       key: "col6",
       name: "Edit",
-      onRender: (item, index) => (
+      onRender: (item) => (
         <IconButton
           iconProps={{ iconName: "Edit" }}
           size={30}
-          onClick={() => EditHandler(index)}
+          onClick={() => EditHandler(item._id)}
         />
       ),
     },
     {
       key: "col7",
       name: "Delete",
-      onRender: (item, index) => (
+
+      onRender: (item) => (
         <IconButton
           iconProps={{ iconName: "Delete" }}
           size={30}
-          onClick={() => DeleteHandler(index)}
+          onClick={() => DeleteHandler(item._id)}
         />
       ),
     },
   ];
 
-  const handleToggle = (index, checked) => {
-    setToggleStates((prev) => ({ ...prev, [index]: checked }));
-    const todoId = tasks[index]._id;
-
-    fetch(`https://backend-todo-beryl.vercel.app/api/todo/${todoId}`, {
+  const handleToggle = (_id, checked) => {
+    const todo = tasks.find((x)=>x._id === _id);
+    const updatedTodo = {
+      ...todo,
+      completed:checked
+    };
+    setTasks((prev)=>[...prev,updatedTodo])
+    fetch(`https://backend-todo-beryl.vercel.app/api/todo/${_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -250,7 +251,8 @@ const App = () => {
     }
   };
 
-  const DeleteHandler = (index) => {
+  const DeleteHandler = (_id) => {
+    const todo = tasks.find((x) => x._id === _id);
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -261,15 +263,12 @@ const App = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(
-          `https://backend-todo-beryl.vercel.app/api/todo/${tasks[index]._id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
+        fetch(`https://backend-todo-beryl.vercel.app/api/todo/${todo._id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
           .then(() => {
             Swal.fire({
               icon: "success",
@@ -291,12 +290,19 @@ const App = () => {
     });
   };
 
-  const EditHandler = (index) => {
+  const EditHandler = (_id) => {
+    const todo = tasks.find((x) => x._id === _id);
+    console.log("tasks...", tasks);
+    console.log("todo...", todo);
     setOpenEditPanel(true);
-    const editTask1 = tasks[index];
-    setEditTask(editTask1);
+    setEditTask({
+      _id: todo._id,
+      title: todo.title,
+      description: todo.description,
+      days: todo.days,
+      schedule: todo.schedule,
+    });
   };
-
   const SubmitEditHandler = (e) => {
     e.preventDefault();
     if (
@@ -361,22 +367,19 @@ const App = () => {
       });
     }
   };
-
   const activeTasks = tasks.filter((task) => !task.completed);
   const completedTasks = tasks.filter((task) => task.completed);
-
   const Logout = () => {
     localStorage.removeItem("token");
     window.location.reload();
   };
-
   const pivotHeaderClass = mergeStyles({
     selectors: {
       ".ms-Pivot-link": {
-        color: "#fff", // Change header text color to white
+        color: "#fff", 
       },
       ".ms-Pivot-link.is-active": {
-        color: "#fff", // Change active header text color to white
+        color: "#fff", 
       },
     },
   });
@@ -437,58 +440,6 @@ const App = () => {
         style={{ width: "63%", marginLeft: "20%", color: "#fff !important" }}
         className="hello"
       >
-        {/* <Pivot aria-label="Basic Pivot Example">
-          <PivotItem
-            headerText="Active Tasks"
-            headerButtonProps={{
-              "data-order": 1,
-              "data-title": "Active Tasks",
-            }}
-
-          >
-            <Label styles={{ root: { color: "#fff" } }}>
-              <div style={{ display: "grid", placeContent: "center" }}>
-                {activeTasks.length === 0 ? (
-                  <div>
-                    <h1>No active tasks available</h1>
-                  </div>
-                ) : (
-                  <DetailsList
-                    items={activeTasks}
-                    columns={columns}
-                    setKey="set"
-                    layoutMode={DetailsListLayoutMode.fixedColumns}
-                    isMultiline={true}
-                    selectionMode={0}
-                    enableShimmer={loading}
-                  />
-                )}
-              </div>
-            </Label>
-          </PivotItem>
-          <PivotItem headerText="Completed">
-            <Label styles={{ root: { color: "#fff" } }}>
-              <div style={{ display: "grid", placeContent: "center" }}>
-                {completedTasks.length === 0 ? (
-                  <div>
-                    <h1>No completed tasks available</h1>
-                  </div>
-                ) : (
-                  <DetailsList
-                    items={completedTasks}
-                    columns={columns}
-                    setKey="set"
-                    layoutMode={DetailsListLayoutMode.fixedColumns}
-                    isMultiline={true}
-                    selectionMode={0}
-                    enableShimmer={loading}
-                  />
-                )}
-              </div>
-            </Label>
-          </PivotItem>
-        </Pivot> */}
-
         <Pivot aria-label="Basic Pivot Example" className={pivotHeaderClass}>
           <PivotItem
             headerText="Active Tasks"
@@ -499,7 +450,6 @@ const App = () => {
           >
             <Label styles={{ root: { color: "#fff" } }}>
               <div style={{ display: "grid", placeContent: "center" }}>
-                {/* Assume activeTasks and columns are defined */}
                 {activeTasks.length === 0 ? (
                   <div>
                     <h1 style={{ color: "#fff" }}>No active tasks available</h1>
@@ -510,9 +460,7 @@ const App = () => {
                     columns={columns}
                     setKey="set"
                     layoutMode={DetailsListLayoutMode.fixedColumns}
-                    isMultiline={true}
-                    selectionMode={0}
-                    enableShimmer={loading}
+                    selectionMode={SelectionMode.none}
                   />
                 )}
               </div>
@@ -521,7 +469,6 @@ const App = () => {
           <PivotItem headerText="Completed">
             <Label styles={{ root: { color: "#fff" } }}>
               <div style={{ display: "grid", placeContent: "center" }}>
-                {/* Assume completedTasks and columns are defined */}
                 {completedTasks.length === 0 ? (
                   <div>
                     <h1 style={{ color: "#fff" }}>
@@ -534,9 +481,7 @@ const App = () => {
                     columns={columns}
                     setKey="set"
                     layoutMode={DetailsListLayoutMode.fixedColumns}
-                    isMultiline={true}
-                    selectionMode={0}
-                    enableShimmer={loading}
+                    selectionMode={SelectionMode.none}
                   />
                 )}
               </div>
