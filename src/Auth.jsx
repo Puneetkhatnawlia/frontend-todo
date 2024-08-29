@@ -32,7 +32,6 @@ const Auth = () => {
 
     try {
       if (isSignInForm) {
-        // Sign In
         const response = await axios.post(
           "https://backend-todo-beryl.vercel.app/api/auth/login",
           { email, password }
@@ -40,7 +39,6 @@ const Auth = () => {
         localStorage.setItem("token", response.data.token);
         navigate("/todos");
       } else {
-        // Sign Up
         await axios.post(
           "https://backend-todo-beryl.vercel.app/api/auth/register",
           { email, username: name, password }
